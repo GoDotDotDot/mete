@@ -1,0 +1,65 @@
+{
+  "name": "mete",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./bin/mete.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "rm -rf lib && mkdir lib && tsc -p tsconfig.json",
+    "build": "yarn tsc -p tsconfig.pro.json && node ./scripts/build.js",
+    "ci": "yarn lint && tsc -p tsconfig.pro.json --noEmit",
+    "lint": "eslint . --ext .js,.ts"
+
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^8.0.0",
+    "@commitlint/config-conventional": "^8.0.0",
+    "@types/cli-table": "^0.3.0",
+    "@types/fs-extra": "^8.1.0",
+    "@types/node": "^12.7.2",
+    "@types/tar-stream": "^2.1.0",
+    "@typescript-eslint/eslint-plugin": "^2.12.0",
+    "@typescript-eslint/eslint-plugin-tslint": "^2.12.0",
+    "@typescript-eslint/parser": "^2.12.0",
+    "cli-table": "^0.3.1",
+    "commitlint-config-cz": "^0.11.1",
+    "cz-conventional-changelog": "^3.0.2",
+    "eslint": "^6.7.2",
+    "eslint-plugin-prettier": "^3.1.2",
+    "husky": "^2.3.0",
+    "lint-staged": "^8.2.0",
+    "prettier": "^1.18.2",
+    "ts-node": "^8.10.1",
+    "tsconfig-paths": "^3.9.0",
+    "typescript": "^3.0.0"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,tsx,md,json,jsx,less}": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm run ci",
+      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS"
+    }
+  },
+  "config": {
+    "commitizen": {
+      "path": "./node_modules/cz-conventional-changelog"
+    }
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.0.0",
+    "commander": "^5.1.0",
+    "fs-extra": "^9.0.0",
+    "got": "^11.1.0",
+    "ora": "^4.0.4",
+    "pretty-bytes": "^5.3.0",
+    "tar-stream": "^2.1.2"
+  }
+}

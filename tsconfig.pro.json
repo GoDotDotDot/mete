@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ES2016",
+    "outDir": "lib",
+    "sourceMap": false,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitReturns": false,
+    "noUnusedLocals": true,
+    "resolveJsonModule": true,
+    "moduleResolution": "node",
+    "allowJs": true,
+    "importHelpers": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./*"]
+    }
+  },
+  "exclude": ["node_modules", "lib", "scripts"]
+}

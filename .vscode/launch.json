@@ -1,0 +1,34 @@
+{
+  // 使用 IntelliSense 了解相关属性。
+  // 悬停以查看现有属性的描述。
+  // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "mete",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register/transpile-only",
+        "-r",
+        "${workspaceFolder}/node_modules/tsconfig-paths/register"
+      ],
+      "program": "${workspaceFolder}/bin/mete.ts",
+      "args": [
+        "material",
+        "list",
+        "component",
+        "--registry",
+        "http://127.0.0.1:7001"
+      ],
+      // "preLaunchTask": "npm: tsc",
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}",
+      "outFiles": ["${workspaceFolder}/lib/**/*.js"],
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "protocol": "inspector"
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "eslint.validate": [
+    "javascript",
+    { "language": "typescript", "autoFix": true },
+    { "language": "typescriptreact", "autoFix": true }
+  ],
+  "eslint.alwaysShowStatus": true,
+  "eslint.options": {
+    "configFile": ".eslintrc.js"
+  },
+  "prettier.configPath": ".prettierrc.json",
+  "debug.node.autoAttach": "on"
+}
