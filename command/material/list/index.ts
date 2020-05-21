@@ -10,8 +10,8 @@ import { getGlobalConfig } from '@/utils/config';
 const program = new Command();
 
 interface List {
-  head: [];
-  data: [];
+  head: string[];
+  data: string[];
 }
 
 async function getMaterialListByType(
@@ -33,7 +33,7 @@ async function getMaterialListByType(
 
   const url = new URL(realRegistry);
 
-  url.pathname = `/-/list/${type}`;
+  url.pathname = `/api/material/list/${type}`;
   url.search = qs.stringify({
     name,
   });
@@ -45,7 +45,10 @@ async function getMaterialListByType(
     process.exit(-1);
   }
 
-  return data;
+  const head = ['name', 'type', 'version', 'createdAt'];
+  const list = data.map(item => head.map(col => item[col] || '-'));
+
+  return { head, data: list };
 }
 
 function displayMaterial(list: List) {
