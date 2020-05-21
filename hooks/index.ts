@@ -1,10 +1,5 @@
 import Events from 'events';
 
-export interface EventParams {
-  args: any;
-  result: any;
-}
-
 export class Hooks {
   private events: Events;
 
@@ -12,30 +7,24 @@ export class Hooks {
     this.events = new Events();
   }
 
-  register(key: string, fn: (args: EventParams) => void) {
+  register<T>(key: string, fn: (args: T) => T) {
     this.events.on(key, fn);
   }
 
-  emitSync<T>(key: string, ...args: any): T {
-    let params: EventParams = { args, result: undefined };
-
+  emitSync<T>(key: string, args: any): T {
     this.events.listeners(key).forEach(listener => {
-      const result = listener(params);
-      params = { args, result };
+      args = listener(args);
     });
 
-    return params.result;
+    return args;
   }
 
-  async emit<T>(key: string, ...args: any): Promise<T> {
-    let params: EventParams = { args, result: undefined };
-
+  async emit<T>(key: string, args: any): Promise<T> {
     for (const listener of this.events.listeners(key)) {
-      const result = await listener(params);
-      params = { args, result };
+      args = await listener(args);
     }
 
-    return params.result;
+    return args;
   }
 
   has(key: string) {

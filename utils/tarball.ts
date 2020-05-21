@@ -21,12 +21,13 @@ export interface ExtractTarball {
   filename: string;
   directory: string;
   name: string;
+  meteData: UrlInfo;
 }
 
 export function downloadTarball({
   url,
   directory,
-}: DownloadTarball): Promise<{ filename: string }> {
+}: DownloadTarball): Promise<{ filename: string; url: string }> {
   const writePath = path.join(directory, TEMP_NAME);
   const spinner = ora(chalk.green('Downloading...')).start();
 
@@ -58,22 +59,27 @@ export function downloadTarball({
           return;
         }
         spinner.succeed(chalk.green('Download successed.'));
-        resolve({ filename: writePath });
+        resolve({ filename: writePath, url });
       },
     );
   });
 }
 
-export function extractTarball({ filename, name, directory }: ExtractTarball) {
+export function extractTarball({
+  filename,
+  name,
+  directory,
+  meteData,
+}: ExtractTarball): Promise<{ entry: string[] }> {
+  const whitelist = ['.tgz', '.tar'];
+
   const spinner = ora(chalk.green('Extracting...')).start();
   const extract = tar.extract();
   const entry = [];
 
   return new Promise((resolve, reject) => {
-    extract.on('entry', function(header, stream, next) {
-      const realPath = header.name.replace(/^package\//, '');
-
-      let writePath = path.join(directory, name, realPath);
+    if (!whitelist.includes(meteData.ext)) {
+      let writePath = path.join(directory, name + meteData.ext);
 
       if (hooks.has(HOOKS.extractTarball.beforeWrite)) {
         writePath = hooks.emitSync<string>(
@@ -82,6 +88,8 @@ export function extractTarball({ filename, name, directory }: ExtractTarball) {
         );
       }
 
+      entry.push(writePath);
+
       const dir = path.dirname(writePath);
       if (!fs.existsSync(dir)) {
         fs.mkdirpSync(dir);
@@ -89,29 +97,82 @@ export function extractTarball({ filename, name, directory }: ExtractTarball) {
 
       spinner.text = `Extract file: ${writePath}`;
 
-      entry.push(writePath);
+      pipeline(
+        fs.createReadStream(filename),
+        fs.createWriteStream(writePath),
+        err => {
+          if (err) {
+            reject(err);
+            spinner.fail(chalk.redBright('Extracting failed.'));
+          } else {
+            spinner.succeed(chalk.green('Extracting successed.'));
 
-      stream.on('end', function() {
-        next(); // ready for next entry
+            resolve({ entry });
+          }
+        },
+      );
+    } else {
+      extract.on('entry', function(header, stream, next) {
+        const realPath = header.name.replace(/^package\//, '');
+
+        let writePath = path.join(directory, name, realPath);
+
+        if (hooks.has(HOOKS.extractTarball.beforeWrite)) {
+          writePath = hooks.emitSync<string>(
+            HOOKS.extractTarball.beforeWrite,
+            writePath,
+          );
+        }
+
+        const dir = path.dirname(writePath);
+        if (!fs.existsSync(dir)) {
+          fs.mkdirpSync(dir);
+        }
+
+        spinner.text = `Extract file: ${writePath}`;
+
+        entry.push(writePath);
+
+        stream.on('end', function() {
+          next(); // ready for next entry
+        });
+
+        pipeline(stream, fs.createWriteStream(writePath), err => {
+          if (err) {
+            spinner.fail(chalk.redBright('Extracting failed.'));
+            reject(err);
+            return;
+          }
+          stream.resume();
+        });
       });
-
-      pipeline(stream, fs.createWriteStream(writePath), err => {
+      pipeline(fs.createReadStream(filename), createUnzip(), extract, err => {
         if (err) {
           spinner.fail(chalk.redBright('Extracting failed.'));
           reject(err);
           return;
         }
-        stream.resume();
+        spinner.succeed(chalk.green('Extracting successed.'));
+        resolve({ entry });
       });
-    });
-    pipeline(fs.createReadStream(filename), createUnzip(), extract, err => {
-      if (err) {
-        spinner.fail(chalk.redBright('Extracting failed.'));
-        reject(err);
-        return;
-      }
-      spinner.succeed(chalk.green('Extracting successed.'));
-      resolve({ entry });
-    });
+    }
   });
+}
+
+export interface UrlInfo {
+  version: string;
+  ext: string;
+  name: string;
+}
+export function getUrlInfo(url: string): UrlInfo {
+  const extName = path.extname(url);
+
+  const basename = path.basename(url, extName);
+
+  const nameVersion = basename.split('-');
+
+  const version = nameVersion.pop();
+  const name = nameVersion.join('');
+
+  return { version, ext: extName, name };
 }

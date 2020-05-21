@@ -4,13 +4,13 @@ import { Command } from 'commander';
 import path from 'path';
 import chalk from 'chalk';
 import hooks from '@/hooks';
-import { downloadTarball, extractTarball } from '@/utils/tarball';
+import { downloadTarball, extractTarball, getUrlInfo } from '@/utils/tarball';
 import { HOOKS } from '@/common/constant';
 
 const program = new Command();
 
-hooks.register(HOOKS.extractTarball.success, ({ args: { filename } }) => {
-  console.log(filename);
+hooks.register(HOOKS.extractTarball.success, ({ entry }) => {
+  console.log(HOOKS.extractTarball.success, entry);
 });
 
 program
@@ -32,18 +32,21 @@ program
     hooks.emitSync(HOOKS.tarballDownload.success, { filename });
 
     const extractDirectory = cmd.dir || process.cwd();
-    const extractName = cmd.fileName || path.parse(url).name;
+    const meteData = getUrlInfo(url);
+    const extractName = cmd.fileName || meteData.name;
 
-    await extractTarball({
+    const { entry } = await extractTarball({
       filename,
       directory: extractDirectory,
       name: extractName,
+      meteData,
     });
 
     hooks.emitSync(HOOKS.extractTarball.success, {
       filename,
       directory: extractDirectory,
       name: extractName,
+      entry,
     });
 
     process.exit(0);
