@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
+import addCMD from './add';
+import listCMD from './list';
+import publishCMD from './publish';
 
-const program = new Command();
+const program = new Command('material');
 
-program
-  .command('add <type>', 'Specify material type like component', {
-    executableFile: './add/index',
-  })
-  .command('list [type]', 'List material', {
-    executableFile: './list/index',
-  })
-  .parse(process.argv);
+program.addCommand(addCMD);
+program.addCommand(listCMD);
+program.addCommand(publishCMD);
+
+program.parse(process.argv);
 
 export default program;

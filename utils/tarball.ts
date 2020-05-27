@@ -3,14 +3,14 @@ import got from 'got';
 import fs from 'fs-extra';
 import ora from 'ora';
 import chalk from 'chalk';
-import { createUnzip } from 'zlib';
 import prettyBytes from 'pretty-bytes';
-import tar from 'tar-stream';
-import hooks from '@/hooks';
+import ignore from 'ignore';
+import tarFs from 'tar-fs';
+import { createUnzip, createGzip } from 'zlib';
 import { pipeline } from 'stream';
-import { HOOKS } from '@/common/constant';
 
-export const TEMP_NAME = '.mete-tmp';
+import hooks from '@/hooks';
+import { HOOKS, GIT_IGNORE, TEMP_DIR, TEMP_NAME } from '@/common/constant';
 
 export interface DownloadTarball {
   url: string;
@@ -74,7 +74,6 @@ export function extractTarball({
   const whitelist = ['.tgz', '.tar'];
 
   const spinner = ora(chalk.green('Extracting...')).start();
-  const extract = tar.extract();
   const entry = [];
 
   return new Promise((resolve, reject) => {
@@ -112,49 +111,34 @@ export function extractTarball({
         },
       );
     } else {
-      extract.on('entry', function(header, stream, next) {
-        const realPath = header.name.replace(/^package\//, '');
+      pipeline(
+        fs.createReadStream(filename),
+        createUnzip(),
+        tarFs.extract(path.join(directory, name), {
+          map: function(header) {
+            let writePath = header.name;
 
-        let writePath = path.join(directory, name, realPath);
-
-        if (hooks.has(HOOKS.extractTarball.beforeWrite)) {
-          writePath = hooks.emitSync<string>(
-            HOOKS.extractTarball.beforeWrite,
-            writePath,
-          );
-        }
-
-        const dir = path.dirname(writePath);
-        if (!fs.existsSync(dir)) {
-          fs.mkdirpSync(dir);
-        }
-
-        spinner.text = `Extract file: ${writePath}`;
-
-        entry.push(writePath);
-
-        stream.on('end', function() {
-          next(); // ready for next entry
-        });
-
-        pipeline(stream, fs.createWriteStream(writePath), err => {
+            if (hooks.has(HOOKS.extractTarball.beforeWrite)) {
+              writePath = hooks.emitSync<string>(
+                HOOKS.extractTarball.beforeWrite,
+                writePath,
+              );
+            }
+            entry.push(writePath);
+            header.name = writePath;
+            return header;
+          },
+        }),
+        err => {
           if (err) {
             spinner.fail(chalk.redBright('Extracting failed.'));
             reject(err);
             return;
           }
-          stream.resume();
-        });
-      });
-      pipeline(fs.createReadStream(filename), createUnzip(), extract, err => {
-        if (err) {
-          spinner.fail(chalk.redBright('Extracting failed.'));
-          reject(err);
-          return;
-        }
-        spinner.succeed(chalk.green('Extracting successed.'));
-        resolve({ entry });
-      });
+          spinner.succeed(chalk.green('Extracting successed.'));
+          resolve({ entry });
+        },
+      );
     }
   });
 }
@@ -175,4 +159,47 @@ export function getUrlInfo(url: string): UrlInfo {
   const name = nameVersion.join('');
 
   return { version, ext: extName, name };
+}
+
+export async function packTar(dir: string, name: string): Promise<string> {
+  const cwdDir = dir;
+  const gitignoreDir = path.join(cwdDir, GIT_IGNORE);
+
+  const ig = ignore();
+  ig.add('.git');
+
+  if (fs.existsSync(gitignoreDir)) {
+    const igPats = fs
+      .readFileSync(gitignoreDir, 'utf-8')
+      .split(/\n|\r\n/)
+      .filter(_ => _ === _ || !_.startsWith('#'));
+    ig.add(igPats);
+  }
+
+  return new Promise((resolve, reject) => {
+    const outDir = path.join(process.cwd(), TEMP_DIR);
+    const outFilename = path.join(outDir, name);
+
+    if (!fs.existsSync(outDir)) {
+      fs.mkdirpSync(outDir);
+    }
+    const writeStream = fs.createWriteStream(outFilename);
+
+    const gZipStream = createGzip();
+
+    writeStream.on('error', reject);
+    writeStream.on('close', () => {
+      resolve(outFilename);
+      hooks.emit(HOOKS.packTarball.success, outFilename);
+    });
+
+    tarFs
+      .pack(cwdDir, {
+        ignore: function(name) {
+          return ig.ignores(path.relative(cwdDir, name));
+        },
+      })
+      .pipe(gZipStream)
+      .pipe(writeStream);
+  });
 }
