@@ -4,6 +4,12 @@ export const HOOKS = {
     success: 'extractTarball@sucess',
   },
   tarballDownload: { success: 'tarballDownload@success' },
+  packTarball: {
+    success: 'packTarball@success',
+  },
 };
 
-export const CONFIG_NAME = 'mete.config.js';
+export const CONFIG_NAME = '.meterc.js';
+export const GIT_IGNORE = '.gitignore';
+export const TEMP_DIR = '.mete';
+export const TEMP_NAME = '.mete-tmp';

@@ -6,8 +6,10 @@ import chalk from 'chalk';
 import Table from 'cli-table';
 import { Command } from 'commander';
 import { getGlobalConfig } from '@/utils/config';
+import { CONFIG_NAME } from '@/common/constant';
+import { error } from '@/utils/log';
 
-const program = new Command();
+const program = new Command('list');
 
 interface List {
   head: string[];
@@ -21,14 +23,12 @@ async function getMaterialListByType(
 ): Promise<List> {
   const realRegistry = registry || getGlobalConfig('registry');
   if (!realRegistry) {
-    console.log(
-      chalk.redBright(
-        `Please specify registry with --registry or set registry in global meterc. see ${chalk.cyan(
-          'mete config set --help',
-        )}.`,
-      ),
-    );
-    process.exit(-1);
+    error(
+      `Please specify registry with --registry or set registry in global ${CONFIG_NAME} see ${chalk.cyan(
+        'mete config set --help',
+      )}.`,
+    ),
+      process.exit(-1);
   }
 
   const url = new URL(realRegistry);
@@ -80,4 +80,5 @@ program
     displayMaterial(data);
   });
 
-program.parse(process.argv);
+// program.parse(process.argv);
+export default program;

@@ -5,9 +5,9 @@ import path from 'path';
 import chalk from 'chalk';
 import hooks from '@/hooks';
 import { downloadTarball, extractTarball, getUrlInfo } from '@/utils/tarball';
-import { HOOKS } from '@/common/constant';
+import { HOOKS, TEMP_DIR } from '@/common/constant';
 
-const program = new Command();
+const program = new Command('add');
 
 hooks.register(HOOKS.extractTarball.success, ({ entry }) => {
   console.log(HOOKS.extractTarball.success, entry);
@@ -22,7 +22,7 @@ program
     'Specify the component directory name like CustomComponent.',
   )
   .action(async (url, cmd) => {
-    const directory = path.join(process.cwd(), '.mete/');
+    const directory = path.join(process.cwd(), TEMP_DIR);
 
     const { filename } = await downloadTarball({
       url,
@@ -73,4 +73,6 @@ program
     console.log(`material add scaffold ${chalk.cyan(url)}`);
   });
 
-program.parse(process.argv);
+// program.parse(process.argv);
+
+export default program;

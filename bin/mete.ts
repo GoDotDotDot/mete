@@ -8,7 +8,7 @@ import packageConfig from '@/package.json';
 // TODO: 这个地方还可以增加自己的命令
 plugin();
 
-const program = new Command();
+const program = new Command('mete');
 
 program
   .command('material [action]', 'material action', {
