@@ -1,0 +1,3 @@
+.meterc.js
+*.ts
+!*.d.ts

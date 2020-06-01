@@ -7,7 +7,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "mete",
+      "name": "mete publish",
       "runtimeArgs": [
         "-r",
         "ts-node/register/transpile-only",
@@ -26,7 +26,7 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "mete-add",
+      "name": "mete add",
       "runtimeArgs": [
         "-r",
         "ts-node/register/transpile-only",
@@ -37,8 +37,37 @@
       "args": [
         "material",
         "add",
+        "mete-work",
+        "--registry",
+        "http://127.0.0.1:7001"
+      ],
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}",
+      "outFiles": ["${workspaceFolder}/lib/**/*.js"],
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "protocol": "inspector"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "mete list",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register/transpile-only",
+        "-r",
+        "${workspaceFolder}/node_modules/tsconfig-paths/register"
+      ],
+      "program": "${workspaceFolder}/bin/mete.ts",
+      "args": [
+        "material",
+        "list",
+        "-n",
+        "mete-work",
+        "-t",
         "component",
-        "http://127.0.0.1:7001/api/material/download/mete-work/mete-work-1.0.1.tgz"
+        "--registry",
+        "http://127.0.0.1:7001"
       ],
       "sourceMaps": true,
       "cwd": "${workspaceFolder}",
