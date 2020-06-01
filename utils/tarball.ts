@@ -11,17 +11,21 @@ import { pipeline } from 'stream';
 
 import hooks from '@/hooks';
 import { HOOKS, GIT_IGNORE, TEMP_DIR, TEMP_NAME } from '@/common/constant';
+import { MaterialSchema } from '@/inerface';
 
 export interface DownloadTarball {
   url: string;
   directory: string;
 }
 
+export interface MeteData extends UrlInfo, MaterialSchema {
+  type: string;
+}
 export interface ExtractTarball {
   filename: string;
   directory: string;
   name: string;
-  meteData: UrlInfo;
+  meteData: MeteData;
 }
 
 export function downloadTarball({
@@ -81,10 +85,13 @@ export function extractTarball({
       let writePath = path.join(directory, name + meteData.ext);
 
       if (hooks.has(HOOKS.extractTarball.beforeWrite)) {
-        writePath = hooks.emitSync<string>(
+        writePath = hooks.emitSync<MeteData & { path: string }>(
           HOOKS.extractTarball.beforeWrite,
-          writePath,
-        );
+          {
+            ...meteData,
+            path: writePath,
+          },
+        ).path;
       }
 
       entry.push(writePath);
@@ -119,11 +126,15 @@ export function extractTarball({
             let writePath = header.name;
 
             if (hooks.has(HOOKS.extractTarball.beforeWrite)) {
-              writePath = hooks.emitSync<string>(
+              writePath = hooks.emitSync<MeteData & { path: string }>(
                 HOOKS.extractTarball.beforeWrite,
-                writePath,
-              );
+                {
+                  ...meteData,
+                  path: writePath,
+                },
+              ).path;
             }
+
             entry.push(writePath);
             header.name = writePath;
             return header;
@@ -156,7 +167,7 @@ export function getUrlInfo(url: string): UrlInfo {
   const nameVersion = basename.split('-');
 
   const version = nameVersion.pop();
-  const name = nameVersion.join('');
+  const name = nameVersion.join('-');
 
   return { version, ext: extName, name };
 }
