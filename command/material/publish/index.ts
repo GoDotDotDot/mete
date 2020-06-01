@@ -8,6 +8,7 @@ import FormData from 'form-data';
 import ora from 'ora';
 import prettyBytes from 'pretty-bytes';
 
+import * as logger from '@/utils/log';
 import { getCwdConfig, getGlobalConfig } from '@/utils/config';
 import { ResponseData } from '@/inerface';
 import { packTar } from '@/utils/tarball';
@@ -55,11 +56,13 @@ async function upload(registry: string, options: any) {
 
   const { code, msg, data } = body as ResponseData;
   if (code) {
-    spinner.fail('Upload failed! ' + msg);
+    spinner.fail('Upload failed! ');
+    logger.error(msg);
     process.exit(0);
   }
 
-  spinner.succeed('Upload successed! File etag: ' + data.etag);
+  spinner.succeed('Upload successed!');
+  console.log(data.etag);
 }
 
 const program = new Command('publish');

@@ -11,7 +11,7 @@ export class Hooks {
     this.events.on(key, fn);
   }
 
-  emitSync<T>(key: string, args: any): T {
+  emitSync<T>(key: string, args: T): T {
     this.events.listeners(key).forEach(listener => {
       args = listener(args);
     });
@@ -19,7 +19,7 @@ export class Hooks {
     return args;
   }
 
-  async emit<T>(key: string, args: any): Promise<T> {
+  async emit<T>(key: string, args: T): Promise<T> {
     for (const listener of this.events.listeners(key)) {
       args = await listener(args);
     }
@@ -32,4 +32,6 @@ export class Hooks {
   }
 }
 
-export default new Hooks();
+const hooks = new Hooks();
+
+export default hooks;

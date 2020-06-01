@@ -1,14 +1,20 @@
 {
-  "name": "mete",
-  "version": "1.0.0",
+  "name": "@mete-work/mete",
+  "version": "1.1.1",
   "description": "",
-  "main": "./bin/mete.js",
+  "main": "lib/bin/mete.js",
+  "bin": {
+    "mete": "./lib/bin/mete.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "tsc": "rm -rf lib && mkdir lib && tsc -p tsconfig.json",
     "build": "yarn tsc -p tsconfig.pro.json && node ./scripts/build.js",
     "ci": "yarn lint && tsc -p tsconfig.pro.json --noEmit",
-    "lint": "eslint . --ext .js,.ts"
+    "lint": "eslint . --ext .js,.ts",
+    "ts-node": "node -r ts-node/register/transpile-only -r ./node_modules/tsconfig-paths/register",
+    "dev": "yarn ts-node bin/mete.ts",
+    "publish:npm": "yarn build && node scripts/published.js && npm publish --access public"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.0.0",
