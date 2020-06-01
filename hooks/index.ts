@@ -32,4 +32,6 @@ export class Hooks {
   }
 }
 
-export default new Hooks();
+const hooks = new Hooks();
+
+export default hooks;

@@ -5,6 +5,7 @@ import got from 'got';
 import chalk from 'chalk';
 import Table from 'cli-table';
 import { Command } from 'commander';
+import plugin from '@/plugin';
 import { getGlobalConfig } from '@/utils/config';
 import { CONFIG_NAME } from '@/common/constant';
 import { error } from '@/utils/log';
@@ -33,9 +34,10 @@ async function getMaterialListByType(
 
   const url = new URL(realRegistry);
 
-  url.pathname = `/api/material/list/${type}`;
+  url.pathname = '/api/material/info';
   url.search = qs.stringify({
     name,
+    type,
   });
 
   const { code, data, msg } = await got(url.href).json();
@@ -45,7 +47,7 @@ async function getMaterialListByType(
     process.exit(-1);
   }
 
-  const head = ['name', 'type', 'version', 'createdAt'];
+  const head = ['name', 'type', 'version', 'tags', 'createdAt'];
   const list = data.map(item => head.map(col => item[col] || '-'));
 
   return { head, data: list };
@@ -67,18 +69,28 @@ function displayMaterial(list: List) {
   console.log(chalk.green(table.toString()));
 }
 
+plugin();
+
 program
-  .command('component [name]')
+  .description('list material')
+  .option('-t, --type <type>', 'Specify the type of material.')
+  .requiredOption(
+    '-n, --materail-name <materail-name>',
+    'Specify the name of material. You can specify the version of materail with ":", ex: mete:1.0.01, the default version is latest.',
+  )
+  .option(
+    '-T, --tags <tags>',
+    'Specify the tags of material, muilt tags split with comma',
+  )
   .option('--registry <registry>', 'Specify the material registry.')
-  .action(async (_, cmd) => {
+  .action(async cmd => {
     const data = await getMaterialListByType(
-      'component',
+      cmd.type,
       cmd.registry,
-      cmd.name,
+      cmd.materailName,
     );
 
     displayMaterial(data);
   });
 
-// program.parse(process.argv);
 export default program;
