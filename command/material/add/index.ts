@@ -5,6 +5,7 @@ import path from 'path';
 import got from 'got';
 import qs from 'querystring';
 import chalk from 'chalk';
+import fs from 'fs-extra';
 import hooks from '@/hooks';
 import plugin from '@/plugin';
 import { downloadTarball, extractTarball, getUrlInfo } from '@/utils/tarball';
@@ -51,7 +52,8 @@ async function getMaterialInfo(
   return data;
 }
 
-hooks.register(HOOKS.extractTarball.success, ({ entry }) => {
+hooks.register(HOOKS.extractTarball.success, ({ entry, filename }) => {
+  fs.removeSync(filename);
   console.log();
   console.log(chalk.green(entry.join('\n')));
 });
@@ -98,20 +100,31 @@ program
 
     const directory = path.join(process.cwd(), TEMP_DIR);
 
-    const { filename } = await downloadTarball({
+    let { filename } = await downloadTarball({
       url,
       directory,
     });
-    hooks.emitSync(HOOKS.tarballDownload.success, { filename });
 
     const extractDirectory = cmd.dir || process.cwd();
     const meteData = getUrlInfo(url);
-    const extractName = cmd.fileName || meteData.name;
+    let name = cmd.fileName || meteData.name;
+
+    const hooksRes = hooks.emitSync(HOOKS.tarballDownload.success, {
+      ...meteData,
+      ...pkg,
+      filename,
+      name,
+    });
+
+    if (hooksRes) {
+      filename = hooksRes.filename;
+      name = hooksRes.name;
+    }
 
     const { entry } = await extractTarball({
       filename,
       directory: extractDirectory,
-      name: extractName,
+      name,
       meteData: {
         ...meteData,
         ...pkg,
@@ -121,7 +134,7 @@ program
     hooks.emitSync(HOOKS.extractTarball.success, {
       filename,
       directory: extractDirectory,
-      name: extractName,
+      name,
       entry,
     });
 

@@ -12,6 +12,8 @@
     "build": "yarn tsc -p tsconfig.pro.json && node ./scripts/build.js",
     "ci": "yarn lint && tsc -p tsconfig.pro.json --noEmit",
     "lint": "eslint . --ext .js,.ts",
+    "ts-node": "node -r ts-node/register/transpile-only -r ./node_modules/tsconfig-paths/register",
+    "dev": "yarn ts-node bin/mete.ts",
     "publish:npm": "yarn build && node scripts/published.js && npm publish --access public"
   },
   "devDependencies": {

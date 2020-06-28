@@ -121,7 +121,7 @@ export function extractTarball({
       pipeline(
         fs.createReadStream(filename),
         createUnzip(),
-        tarFs.extract(path.join(directory, name), {
+        tarFs.extract(path.join(directory), {
           map: function(header) {
             let writePath = header.name;
 
@@ -131,6 +131,7 @@ export function extractTarball({
                 {
                   ...meteData,
                   path: writePath,
+                  name,
                 },
               ).path;
             }
@@ -178,6 +179,7 @@ export async function packTar(dir: string, name: string): Promise<string> {
 
   const ig = ignore();
   ig.add('.git');
+  ig.add('.mete');
 
   if (fs.existsSync(gitignoreDir)) {
     const igPats = fs

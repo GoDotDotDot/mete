@@ -4,7 +4,7 @@ export interface Config {
   name: string;
   version: string;
   tag: string;
-  type: 'component' | 'block' | 'scaffold' | 'page';
+  type: string;
   registry: string;
   plugin: Array<(api: Hooks) => Promise<void> | void>;
   author?: string;
