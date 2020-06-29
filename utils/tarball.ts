@@ -26,6 +26,7 @@ export interface ExtractTarball {
   directory: string;
   name: string;
   meteData: MeteData;
+  rewrite: boolean;
 }
 
 export function downloadTarball({
@@ -74,6 +75,7 @@ export function extractTarball({
   name,
   directory,
   meteData,
+  rewrite,
 }: ExtractTarball): Promise<{ entry: string[] }> {
   const whitelist = ['.tgz', '.tar'];
 
@@ -137,6 +139,22 @@ export function extractTarball({
             }
 
             entry.push(writePath);
+
+            // 如果本地存在该文件，询问是否覆盖
+            if (
+              !rewrite &&
+              fs.existsSync(writePath) &&
+              fs.statSync(writePath).isFile()
+            ) {
+              console.log('');
+              console.log(
+                chalk.yellowBright(
+                  `Found same file: ${writePath} and will rename old filename to new filename with postfix(.backup) at default, if you don't wanna rename, please add -r or --rewrite option.`,
+                ),
+              );
+              fs.renameSync(writePath, writePath + '.backup');
+            }
+
             header.name = writePath;
             return header;
           },

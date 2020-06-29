@@ -3,10 +3,10 @@ import { Hooks } from './hooks';
 export interface Config {
   name: string;
   version: string;
-  tag: string;
+  tags?: string[];
   type: string;
-  registry: string;
-  plugin: Array<(api: Hooks) => Promise<void> | void>;
+  registry?: string;
+  plugin?: Array<(api: Hooks) => Promise<void> | void>;
   author?: string;
 }
 

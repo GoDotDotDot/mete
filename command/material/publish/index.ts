@@ -10,7 +10,7 @@ import prettyBytes from 'pretty-bytes';
 
 import * as logger from '@/utils/log';
 import { getCwdConfig, getGlobalConfig } from '@/utils/config';
-import { ResponseData } from '@/inerface';
+import { ResponseData, Config } from '@/inerface';
 import { packTar } from '@/utils/tarball';
 import hooks from '@/hooks';
 import { HOOKS } from '@/common/constant';
@@ -19,8 +19,8 @@ hooks.register(HOOKS.packTarball.success, dir => {
   fs.remove(dir as string);
 });
 
-async function upload(registry: string, options: any) {
-  const { version = '1.0.0', type = 'component', name } = options;
+async function upload(registry: string, options: Config) {
+  const { version = '1.0.0', type = 'component', name, tags } = options;
   const objectName = `${name}-${version}.tgz`;
   const fileName = await packTar(process.cwd(), objectName);
   const defaultUrl = '/api/material/upload';
@@ -33,6 +33,7 @@ async function upload(registry: string, options: any) {
   form.append('version', version);
   form.append('type', type);
   form.append('name', name);
+  form.append('tags', JSON.stringify(tags));
 
   form.append('file', fs.createReadStream(fileName));
 
@@ -72,14 +73,21 @@ program
   .option('-n, --name <name>', 'material name.')
   .option(
     '-t, --type <type>',
-    'materail type, optional type are component, block, scaffold, page.',
+    'materail type, the recommended options type are component, block, scaffold, page.',
   )
   .option('--registry <registry>', 'specify the material registry.')
+  .usage('[options]')
+
+  .on('--help', () => {
+    console.log('');
+    console.log('Example call:');
+    console.log('  $ mete material publish');
+  })
   .action(async cmd => {
     const config = getCwdConfig();
-    const { name, type, version } = config;
+    const { name, type, version, tags } = config;
     const registry = cmd.registry || getGlobalConfig('registry');
-    await upload(registry, { name, version, type });
+    await upload(registry, { name, version, type, tags });
     process.exit(0);
   });
 
