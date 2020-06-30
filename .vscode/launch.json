@@ -73,6 +73,25 @@
       "console": "integratedTerminal",
       "autoAttachChildProcesses": true,
       "protocol": "inspector"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "mete config set",
+      "runtimeArgs": [
+        "-r",
+        "ts-node/register/transpile-only",
+        "-r",
+        "${workspaceFolder}/node_modules/tsconfig-paths/register"
+      ],
+      "program": "${workspaceFolder}/bin/mete.ts",
+      "args": ["config", "set", "registry2", "http://127.0.0.1:7001"],
+      "sourceMaps": true,
+      "cwd": "${workspaceFolder}",
+      "outFiles": ["${workspaceFolder}/lib/**/*.js"],
+      "console": "integratedTerminal",
+      "autoAttachChildProcesses": true,
+      "protocol": "inspector"
     }
   ]
 }

@@ -11,6 +11,9 @@ async function main() {
     .command('material <command>', 'material command', {
       executableFile: '../command/material/index',
     })
+    .command('config <command>', 'config command', {
+      executableFile: '../command/config/index',
+    })
     .version(packageConfig.version)
     .usage('<command> [options]')
     .on('command:*', function(cmd) {
