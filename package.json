@@ -1,6 +1,6 @@
 {
   "name": "@mete-work/mete",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "description": "mete is a cli for universe!",
   "main": "lib/bin/mete.js",
   "bin": {

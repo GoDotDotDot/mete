@@ -39,7 +39,7 @@ async function getMaterialListByType(
 
   const url = new URL(realRegistry);
 
-  url.pathname = '/api/material/info';
+  url.pathname = '/api/material/list';
   url.search = qs.stringify(
     deleteNullOrUndefinedField({
       name,
