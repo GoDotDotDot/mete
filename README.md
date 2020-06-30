@@ -2,7 +2,4 @@
 
 Mete is a cli for universe!
 
-## Feature
-
-- Plugin eco Support
-- Material function Support
+See [简体中文](./README_CN.md)

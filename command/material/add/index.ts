@@ -62,12 +62,20 @@ plugin();
 
 program
   .description('download material')
-  .option('-d, --dir <directory>', 'Specify the component directory.')
   .option(
-    '-n, --file-name <name>',
-    'Specify the component directory name like CustomComponent.',
+    '-d, --dir <directory>',
+    'specify the directory that material will download, default value is current work directory.',
   )
-  .option('--registry <registry>', 'Specify the material registry.')
+  .option('-n, --file-name <name>', 'specify the material name.')
+  .option('--registry <registry>', 'specify the material registry.')
+  .option('-r, --rewrite', 'rewrite file same name.', false)
+  .usage('<material name> [options]')
+
+  .on('--help', () => {
+    console.log('');
+    console.log('Example call:');
+    console.log('  $ mete material add mete-work-plugin');
+  })
 
   .action(async (cmd, arg) => {
     let url = arg[0];
@@ -81,7 +89,7 @@ program
         cmd.registry || getCwdConfig('registry') || getGlobalConfig('registry');
       if (!registry) {
         error(
-          'registry is not found! you can specify registry with --registry option.',
+          'registry is not found! you can specify registry with --registry option or set registry in global config file.',
         );
         process.exit(-1);
       }
@@ -129,6 +137,7 @@ program
         ...meteData,
         ...pkg,
       },
+      rewrite: cmd.rewrite,
     });
 
     hooks.emitSync(HOOKS.extractTarball.success, {

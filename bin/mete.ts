@@ -8,7 +8,7 @@ const program = new Command('mete');
 
 async function main() {
   program
-    .command('material [action]', 'material action', {
+    .command('material <command>', 'material command', {
       executableFile: '../command/material/index',
     })
     .version(packageConfig.version)

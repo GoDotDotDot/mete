@@ -3,8 +3,9 @@
 import qs from 'querystring';
 import got from 'got';
 import chalk from 'chalk';
-import Table from 'cli-table';
+import TtyTable from 'tty-table';
 import { Command } from 'commander';
+import dayjs from 'dayjs';
 import plugin from '@/plugin';
 import { getGlobalConfig } from '@/utils/config';
 import { CONFIG_NAME } from '@/common/constant';
@@ -27,9 +28,8 @@ async function getMaterialListByType(
   const realRegistry = registry || getGlobalConfig('registry');
   if (!realRegistry) {
     error(
-      `Please specify registry with --registry or set registry in global ${CONFIG_NAME} see ${chalk.cyan(
-        'mete config set --help',
-      )}.`,
+      `Please specify registry with --registry or set registry in global ${CONFIG_NAME}, see:
+  ${chalk.cyan('mete config set --help')}`,
     ),
       process.exit(-1);
   }
@@ -61,33 +61,67 @@ async function getMaterialListByType(
 function displayMaterial(list: List) {
   const { head, data } = list;
 
-  const tableHead = head.map(item => chalk.cyan(item));
+  const tableHead = head.map(item => {
+    let value = item;
 
-  const table = new Table({
-    head: tableHead,
+    if (item === 'createdAt') {
+      value = 'publish time';
+    }
+
+    return {
+      align: 'left',
+      value: value.toUpperCase(),
+      headerAlign: 'left',
+      headerColor: 'green',
+      formatter: v => {
+        if (item === 'createdAt') {
+          return dayjs(v).format('YYYY-MM-DD HH:mm:ss');
+        }
+
+        if (item === 'tags') {
+          return v.join(',');
+        }
+
+        return v;
+      },
+    };
   });
 
-  data.forEach(item => {
-    table.push(item);
-  });
+  // eslint-disable-next-line
+  // @ts-ignore
+  const out = TtyTable(tableHead, data, {
+    borderStyle: 'none',
+    compact: true,
+    align: 'left',
+    color: 'white',
+    marginTop: 0,
+    marginLeft: 0,
+  }).render();
 
-  console.log(chalk.green(table.toString()));
+  console.log(chalk.green(out));
 }
 
 plugin();
 
 program
   .description('list material')
-  .option('-t, --type <type>', 'Specify the type of material.')
-  .requiredOption(
+  .option('-t, --type <type>', 'specify the type of material.')
+  .option(
     '-n, --materail-name <materail-name>',
-    'Specify the name of material. You can specify the version of materail with ":", ex: mete:1.0.01, the default version is latest.',
+    'specify the name of material. You can specify the version of materail with ":", ex: mete:1.0.1, the default version is latest.',
   )
   .option(
     '-T, --tags <tags>',
-    'Specify the tags of material, muilt tags split with comma',
+    'specify the tags of material, muilt tags split with comma',
   )
-  .option('--registry <registry>', 'Specify the material registry.')
+  .option('--registry <registry>', 'specify the material registry.')
+  .usage('[options]')
+
+  .on('--help', () => {
+    console.log('');
+    console.log('Example call:');
+    console.log('  $ mete material list -t plugin');
+  })
   .action(async cmd => {
     const data = await getMaterialListByType(
       cmd.type,
