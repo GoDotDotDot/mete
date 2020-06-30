@@ -112,6 +112,34 @@ $ mete material list -t page --registry=http://127.0.0.1:7001
  boss-admin-login  page  1.1.4    boss admin           2020-06-29 17:13:19
 ```
 
+### Config
+
+`mete config`，该命令用于配置全局信息，可通过 `mete config --help` 获取帮助信息。
+
+```shell
+$ mete config --help
+Usage: config <command> [options]
+
+Options:
+  -h, --help      display help for command
+
+Commands:
+  set             set config
+  get             get config
+  remove          remove config
+  help [command]  display help for command
+
+Example call:
+  $ mete config get registry
+```
+
+例如：
+
+```shell
+$ mete config get material.registry
+material.registry=http://127.0.0.1:7001
+```
+
 ## 插件
 
 mete 支持通过插件来丰富脚手架的能力。

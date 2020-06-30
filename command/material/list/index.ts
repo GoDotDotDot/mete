@@ -7,7 +7,7 @@ import TtyTable from 'tty-table';
 import { Command } from 'commander';
 import dayjs from 'dayjs';
 import plugin from '@/plugin';
-import { getGlobalConfig } from '@/utils/config';
+import { getGlobalConfig, getCwdConfig } from '@/utils/config';
 import { CONFIG_NAME } from '@/common/constant';
 import { error } from '@/utils/log';
 import { deleteNullOrUndefinedField } from '@/utils/utils';
@@ -25,10 +25,13 @@ async function getMaterialListByType(
   tags?: string[],
   registry?: string,
 ): Promise<List> {
-  const realRegistry = registry || getGlobalConfig('registry');
+  const realRegistry =
+    registry ||
+    getCwdConfig('material.registry')[0] ||
+    getGlobalConfig('material.registry');
   if (!realRegistry) {
     error(
-      `Please specify registry with --registry or set registry in global ${CONFIG_NAME}, see:
+      `registry is not found! you can specify registry with --registry option or set registry in ${CONFIG_NAME} or set registry in global config file, see:
   ${chalk.cyan('mete config set --help')}`,
     ),
       process.exit(-1);
@@ -101,8 +104,6 @@ function displayMaterial(list: List) {
   console.log(chalk.green(out));
 }
 
-plugin();
-
 program
   .description('list material')
   .option('-t, --type <type>', 'specify the type of material.')
@@ -123,6 +124,8 @@ program
     console.log('  $ mete material list -t plugin');
   })
   .action(async cmd => {
+    plugin();
+
     const data = await getMaterialListByType(
       cmd.type,
       cmd.materailName,

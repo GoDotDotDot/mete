@@ -1,13 +1,14 @@
-import { Hooks } from './hooks';
-
 export interface Config {
-  name: string;
-  version: string;
-  tags?: string[];
-  type: string;
-  registry?: string;
-  plugin?: Array<(api: Hooks) => Promise<void> | void>;
-  author?: string;
+  material: {
+    name: string;
+    version: string;
+    tags?: string[];
+    type: string;
+    registry?: string;
+    author?: string;
+  };
+  plugin?: Function[];
+  [key: string]: any;
 }
 
 export interface ResponseData {

@@ -8,18 +8,19 @@ import FormData from 'form-data';
 import ora from 'ora';
 import prettyBytes from 'pretty-bytes';
 
+import plugin from '@/plugin';
 import * as logger from '@/utils/log';
 import { getCwdConfig, getGlobalConfig } from '@/utils/config';
 import { ResponseData, Config } from '@/inerface';
 import { packTar } from '@/utils/tarball';
 import hooks from '@/hooks';
-import { HOOKS } from '@/common/constant';
+import { HOOKS, CONFIG_NAME } from '@/common/constant';
 
 hooks.register(HOOKS.packTarball.success, dir => {
   fs.remove(dir as string);
 });
 
-async function upload(registry: string, options: Config) {
+async function upload(registry: string, options: Config['material']) {
   const { version = '1.0.0', type = 'component', name, tags } = options;
   const objectName = `${name}-${version}.tgz`;
   const fileName = await packTar(process.cwd(), objectName);
@@ -84,9 +85,26 @@ program
     console.log('  $ mete material publish');
   })
   .action(async cmd => {
-    const config = getCwdConfig();
-    const { name, type, version, tags } = config;
-    const registry = cmd.registry || getGlobalConfig('registry');
+    plugin();
+
+    const config = getCwdConfig('material')[0];
+
+    if (!config) {
+      logger.error(`please config material info in ${CONFIG_NAME}.`);
+      process.exit(-1);
+    }
+
+    const { name, type, version, tags, registry: cwdRegistry } = config;
+
+    const registry =
+      cmd.registry || cwdRegistry || getGlobalConfig('material.registry');
+
+    if (!registry) {
+      logger.error(
+        `registry is not found! you can specify registry with --registry option or set registry in ${CONFIG_NAME} or set registry in global config file.`,
+      );
+      process.exit(-1);
+    }
     await upload(registry, { name, version, type, tags });
     process.exit(0);
   });

@@ -58,8 +58,6 @@ hooks.register(HOOKS.extractTarball.success, ({ entry, filename }) => {
   console.log(chalk.green(entry.join('\n')));
 });
 
-plugin();
-
 program
   .description('download material')
   .option(
@@ -78,6 +76,12 @@ program
   })
 
   .action(async (cmd, arg) => {
+    plugin();
+    if (!arg) {
+      error('please use mete material add --help');
+      process.exit(-1);
+    }
+
     let url = arg[0];
 
     // eslint-disable-next-line
@@ -86,7 +90,9 @@ program
 
     if (!isUrl(url)) {
       const registry =
-        cmd.registry || getCwdConfig('registry') || getGlobalConfig('registry');
+        cmd.registry ||
+        getCwdConfig('material.registry')[0] ||
+        getGlobalConfig('material.registry');
       if (!registry) {
         error(
           'registry is not found! you can specify registry with --registry option or set registry in global config file.',
