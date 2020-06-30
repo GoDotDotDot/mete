@@ -1,7 +1,7 @@
 {
   "name": "@mete-work/mete",
-  "version": "1.1.2",
-  "description": "",
+  "version": "1.1.3",
+  "description": "mete is a cli for universe!",
   "main": "lib/bin/mete.js",
   "bin": {
     "mete": "./lib/bin/mete.js"
@@ -14,8 +14,7 @@
     "lint": "eslint . --ext .js,.ts",
     "ts-node": "node -r ts-node/register/transpile-only -r ./node_modules/tsconfig-paths/register",
     "dev": "yarn ts-node bin/mete.ts",
-    "publish:npm": "yarn build && node scripts/published.js && npm publish --access public",
-    "postpublish": "node scripts/published.js"
+    "publish:npm": "yarn build && node scripts/published.js && npm publish --access public"
   },
   "devDependencies": {
     "@commitlint/cli": "^8.0.0",
@@ -56,9 +55,23 @@
       "path": "./node_modules/cz-conventional-changelog"
     }
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "cli",
+    "material",
+    "universe",
+    "plugin",
+    "mete"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/godotdotdot/mete.git"
+  },
+  "bugs": {
+    "url": "https://github.com/godotdotdot/mete/issues"
+  },
+  "homepage": "https://github.com/godotdotdot/mete#readme",
+  "author": "godotdotdot",
+  "license": "MIT",
   "dependencies": {
     "chalk": "^4.0.0",
     "commander": "^5.1.0",
