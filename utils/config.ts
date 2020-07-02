@@ -53,7 +53,7 @@ export function getConfig(...args) {
     config = config.__esModule ? config.default : config;
     return key.length ? get(config, key) : config;
   } catch (err) {
-    // nothing
+    return key.length ? [] : {};
   }
 }
 
